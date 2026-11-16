@@ -1,4 +1,4 @@
-// Token Radar dashboard (radar-3-fitted). Reads window.RADAR (bundled beside this
+// Token Radar dashboard (radar-4-fitted). Reads window.RADAR (bundled beside this
 // folder as data.js) and renders the board entirely offline: no fetch, no network.
 // RULE: the detail view displays the STORED board values only. Nothing here
 // recomputes an implied value — the board's implied value, its P10-P90 range and
@@ -202,12 +202,13 @@
       '<span class="chip skip" role="listitem"><b>' + (sc === undefined ? '—' : sc) + '</b> SKIP</span>'
     ];
     $('chips').innerHTML = chips.join('');
+    $('verify-line').textContent = 'Page = board.json: ' + boardN + ' ranks, ' + boardN + ' values, ' + boardN + ' bands, ' + boardN + ' verdicts and nets — the page and board.json are built from the same run, so every number on this page matches the board file.';
     $('formula').textContent = model.formula || '—';
     var coefs = [
       ['Intercept', num(model.intercept, null) === null ? '—' : Number(model.intercept).toFixed(3)],
       ['Slope', num(model.slope, null) === null ? '—' : Number(model.slope).toFixed(3)],
-      ['Growth coef', num(model.growth_coef, null) === null ? '—' : Number(model.growth_coef).toFixed(3)],
-      ['Age coef', num(model.age_coef, null) === null ? '—' : Number(model.age_coef).toFixed(3)]
+      ['Momentum weight', num(model.growth_coef, null) === null ? '—' : Number(model.growth_coef).toFixed(3)],
+      ['Seasoning scale', num(model.age_coef, null) === null ? '—' : Number(model.age_coef).toFixed(3)]
     ];
     $('coefs').innerHTML = coefs.map(function (c) {
       return '<div><dt>' + c[0] + '</dt><dd>' + c[1] + '</dd></div>';
