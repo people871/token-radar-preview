@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Token Radar — pre-token protocols ranked by implied value</title>
-<meta name="description" content="A static, offline board of pre-token protocols ranked by model implied value, with the traded set shown separately at market value. Every number on the page comes from the bundled snapshot; the pricing formula and its blind backtest are printed on the page.">
+<meta name="description" content="A static, offline board of pre-token protocols ranked by model implied value; traded tokens are shown separately at market value. Every number comes from the bundled snapshot.">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -12,9 +12,10 @@
 <div class="wrap">
   <header class="masthead">
     <div>
-      <p class="eyebrow">Token Radar · model radar-4-fitted</p>
+      <p class="eyebrow">Token Radar · model radar-5-fitted</p>
       <h1><span id="headline-n">—</span> protocols record no token. Here is what each launch would be worth, and what farming it costs.</h1>
       <p class="howto">Implied value is a model estimate built from the snapshot&rsquo;s own figures — TVL, 7-day growth, and how long a protocol has run with no token — fitted on the tokens that already trade. It is not a price and not a promise. A protocol is pre-token when its record shows no CoinGecko id, no ticker and no market cap; traded tokens are kept apart at the market&rsquo;s own market cap, never at a model value.</p>
+      <p class="hero-line" id="hero-line">—</p>
     </div>
     <dl class="meta" aria-label="Snapshot details">
       <div><dt>Snapshot</dt><dd id="asof">—</dd></div>
@@ -41,18 +42,30 @@
             <tbody id="backtest-body"></tbody>
           </table>
           <p class="fine" id="backtest-note">—</p>
+          <table class="backtest" id="ablation">
+            <caption>Ablation — each component earns its keep, on the same splits</caption>
+            <thead><tr><th scope="col">Variant</th><th scope="col">Blind miss (LOO)</th><th scope="col">Within 3× (LOO)</th><th scope="col">Time split</th><th scope="col">Within 3× (time)</th></tr></thead>
+            <tbody id="ablation-body"></tbody>
+          </table>
+          <p class="fine" id="ablation-note">—</p>
         </section>
 
         <section class="panel scatter" aria-labelledby="scatter-h">
           <h2 id="scatter-h">Size curve: market cap on TVL</h2>
           <div id="scatter" role="img" aria-label="Scatter chart of traded tokens at market cap and board protocols at implied value, against the fitted size curve"></div>
           <p class="fine" id="scatter-cap">—</p>
+          <h2 id="hist-h">Distribution of implied values</h2>
+          <div id="hist" role="img" aria-label="Histogram of the board's implied values on a log scale"></div>
+          <p class="fine" id="hist-cap">—</p>
         </section>
 
         <section class="panel bestnet" aria-labelledby="bestnet-h">
           <h2 id="bestnet-h">Best net per $1.0K on the board</h2>
           <ol class="bestnet-list" id="bestnet"></ol>
           <p class="fine">Net = 10% airdrop slice at implied value, minus gas fees, minus the T-bill return forgone while the $1.0K is parked. Ranked on net after all costs, per $1.0K of capital.</p>
+          <h2 id="farmnext-h">Farm next — best net per hands-on hour</h2>
+          <ol class="bestnet-list" id="farmnext"></ol>
+          <p class="fine">The same $1.0K plans, ranked on net per hour of active work (2.5 h per plan).</p>
         </section>
       </div>
     </section>
@@ -74,6 +87,7 @@
         <label for="verdict">Verdict</label>
         <select id="verdict">
           <option value="">All verdicts</option>
+          <option value="ROBUST">ROBUST</option>
           <option value="FARM">FARM</option>
           <option value="THIN">THIN</option>
           <option value="SKIP">SKIP</option>
@@ -113,22 +127,22 @@
 
     <section class="panel setaside" id="setaside-view" hidden aria-labelledby="setaside-h">
       <h2 id="setaside-h">Set aside by the house rule — <span id="setaside-n2">—</span> protocols</h2>
-      <p>These protocols are in the snapshot but are <strong>not ranked</strong>, because the house rule sets them aside before any scoring: versioned names (a trailing v2, v3, …); wrapped, staked or staking names; the six excluded categories (Bridge, Canonical Bridge, Liquid Staking, Liquid Restaking, Restaked BTC, CEX); and names that start with an exchange name. The rule is applied to the name and category only — never to a protocol&rsquo;s size — so a large protocol can still be set aside, and a small one can still rank. Nothing on this list is scored, given an implied value, or given a farm plan.</p>
+      <p>These protocols are in the snapshot but are <strong>not ranked</strong>, because the house rule sets them aside before any scoring: versioned names (a trailing v2, v3, …); wrapped, staked or staking names; the six excluded categories (Bridge, Canonical Bridge, Liquid Staking, Liquid Restaking, Restaked BTC, CEX); and names that start with an exchange name. The rule is applied to the name and category only — never to a protocol&rsquo;s size — so a large protocol can still be set aside, and a small one can still rank.</p>
       <p class="fine">Count comes from the snapshot: <span id="setaside-count">—</span> protocols set aside, <span id="setaside-board">—</span> ranked on the board, <span id="setaside-live">—</span> traded tokens kept apart at market cap.</p>
     </section>
 
     <section class="panel method" id="method-view" hidden aria-labelledby="method-h">
       <h2 id="method-h">Method and backtest</h2>
       <h3>How the size curve is fitted</h3>
-      <p>Every token that already trades is used to fit the curve — all 128 of them, in every category — and only pre-token protocols are scored with it. On the snapshot&rsquo;s traded tokens we fit a log-log ordinary least squares line: log<sub>10</sub>(market cap) = intercept + slope &times; log<sub>10</sub>(TVL / $100M). The fitted line is the size curve: a protocol&rsquo;s TVL alone, before any family offset, maps to a size value. Fitting on the whole traded set matters: the six excluded categories are excluded from the <em>board</em> only, never from the curve, because the curve is the market&rsquo;s and the category offsets are what make categories comparable. The four fitted numbers are printed in the &ldquo;How a launch is priced&rdquo; panel above and are read from the bundled data, not typed here. Growth and age are not regressors in this fit: they enter as bounded multipliers (next paragraph), because a free log-age coefficient failed the time-split backtest in the previous model — it priced the future worse than a flat multiple.</p>
+      <p>Every token that already trades is used to fit the curve — all 128 of them, in every category — and only pre-token protocols are scored with it. On the snapshot&rsquo;s traded tokens we fit a log-log ordinary least squares line: log<sub>10</sub>(market cap) = intercept + slope &times; log<sub>10</sub>(TVL / $100M). The fitted line is the size curve: a protocol&rsquo;s TVL alone, before any family offset, maps to a size value. Fitting on the whole traded set matters: the six excluded categories are excluded from the <em>board</em> only, never from the curve, because the curve is the market&rsquo;s and the category offsets are what make categories comparable. The four fitted numbers are printed in the &ldquo;How a launch is priced&rdquo; panel above and are read from the bundled data, not typed here. Growth and age are not regressors in this fit: they enter as bounded multipliers (next paragraph), because a free log-age coefficient failed the time-split backtest in the previous model.</p>
       <h3>Family, growth and seasoning</h3>
-      <p>Three multipliers adjust the size value. <strong>Family</strong> is the protocol&rsquo;s category mean residual from the fitted line, shrunk toward 1 when the category has few traded tokens — a category whose traded tokens sit above the line lifts its pre-token members, and one below the line pulls them down. <strong>Momentum</strong> comes from the 7-day TVL change: 1 plus half the change, clamped to 0.8&times;&ndash;1.25&times;, so a crash can cost at most 20% and a spike can add at most 25% — growth moves the value without ever inverting the board. <strong>Seasoning</strong> comes from age with no token: 1 &minus; 0.4&middot;e<sup>&minus;age/240</sup>, so a fresh protocol is discounted to 0.6&times; and the discount saturates toward 1&times; as it ages instead of discounting it toward zero. Implied value = size value &times; family &times; momentum &times; seasoning. The P10–P90 range around it is the blind residual range from the backtest below, so the band is earned from prediction errors, not assumed.</p>
+      <p>Three multipliers adjust the size value. <strong>Family</strong> is the protocol&rsquo;s category mean residual from the fitted line, shrunk toward 1 when the category has few traded tokens — a category whose traded tokens sit above the line lifts its pre-token members, and one below the line pulls them down. <strong>Momentum</strong> comes from the 7-day TVL change: 1 plus half the change, clamped to 0.8&times;&ndash;1.25&times;, so a crash can cost at most 20% and a spike can add at most 25% — growth moves the value without ever inverting the board. <strong>Seasoning</strong> comes from age with no token: 1 &minus; 0.4&middot;e<sup>&minus;age/240</sup>, so a fresh protocol is discounted to 0.6&times; and the discount saturates toward 1&times; as it ages instead of discounting it toward zero. Implied value = size value &times; family &times; momentum &times; seasoning. The range the board shows around it is the middle half (P25–P75) of the blind residual range; the wider P10–P90 range stays in the data and in each protocol&rsquo;s detail view.</p>
       <h3>How the blind backtests work</h3>
-      <p><strong>Leave-one-out (LOO):</strong> each traded token is held out in turn, the curve is refit without it, and the held-out token is predicted blind. The median blind error and the share of predictions within 3&times; of the true market cap are reported against the same test for a flat baseline — one median market-cap/TVL multiple applied to every token. <strong>Time split:</strong> the curve is fitted only on tokens listed before 2024 and tested on tokens listed later, so the test is genuinely future data. <strong>Bands:</strong> the share of traded tokens whose true market cap falls inside the blind 50% and 80% bands. A fitted curve that only beats the flat baseline on the data it was fitted on proves nothing; the numbers in the table are all out-of-sample.</p>
+      <p><strong>Leave-one-out (LOO):</strong> each traded token is held out in turn, the curve is refit without it, and the held-out token is predicted blind. The median blind error and the share of predictions within 3&times; of the true market cap are reported against the same test for a flat baseline — one median market-cap/TVL multiple applied to every token. <strong>Time split:</strong> the curve is fitted only on tokens listed before 2024 and tested on tokens listed later, so the test is genuinely future data. <strong>Bands:</strong> the share of traded tokens whose true market cap falls inside the blind 50% and 80% bands. A fitted curve that only beats the flat baseline on the data it was fitted on proves nothing; the numbers in the table are all out-of-sample. The ablation table scores four variants on the same splits with the same refit-per-fold discipline — one flat multiple, the size curve alone, the curve plus family offsets, and the full model. The honest reading: the curve alone does most of the work (it already beats flat on both splits and has the best median miss); the family offsets add blind-test coverage but cost a little on the time split; the bounded multipliers restore it and add the last points. Within-2&times; shares are reported alongside within-3&times; as the stricter metric.</p>
       <h3>How a farm verdict is computed</h3>
-      <p>Every verdict is priced at the same fixed terms: <strong>$1,000 of capital</strong> and a <strong>10% airdrop share</strong> of the implied value, pro-rata to TVL. The slice is 10% of the implied value scaled to $1,000 of capital. <strong>Fees</strong> are five transactions at the chain&rsquo;s typical gas. <strong>T-bill forgone</strong> is the 4% annual return the $1,000 would have earned parked in a T-bill for the hold days. Net = slice &minus; fees &minus; T-bill forgone. <strong>FARM</strong> if net &ge; $1, <strong>THIN</strong> if &minus;$10 &le; net &lt; $1, <strong>SKIP</strong> if net &lt; &minus;$10. The verdict is therefore a statement about the economics at $1,000, not about whether the protocol is good: a large implied value can still be SKIP if the slice it buys at $1,000 does not cover the gas and the forgone T-bill return. The farm plan lists the seven concrete steps, each with its own cost and time, and the scenario table shows the net if the token drops 5%, 10% or 20% at $1.0K, $10.0K and $100K of capital.</p>
+      <p>Every verdict is priced at the same fixed terms: <strong>$1,000 of capital</strong> and a <strong>10% airdrop share</strong> of the implied value, pro-rata to TVL. The slice is 10% of the implied value scaled to $1,000 of capital. <strong>Fees</strong> are five transactions at the chain&rsquo;s typical gas. <strong>T-bill forgone</strong> is the 4% annual return the $1,000 would have earned parked in a T-bill for the hold days. Net = slice &minus; fees &minus; T-bill forgone. <strong>FARM</strong> if net &ge; $1, <strong>THIN</strong> if &minus;$10 &le; net &lt; $1, <strong>SKIP</strong> if net &lt; &minus;$10. <strong>ROBUST</strong> is a display tier on top of FARM: a FARM row whose net at the P25 low end is still &ge; $1, with its low-end net printed under the point net. The verdict is therefore a statement about the economics at $1,000, not about whether the protocol is good: a large implied value can still be SKIP if the slice it buys at $1,000 does not cover the gas and the forgone T-bill return. <strong>Break-even</strong> is the launch value at which the farm exactly breaks even: (fees + T-bill) &times; TVL / (0.10 &times; $1,000). <strong>Break-even odds</strong> are the share of the model&rsquo;s own leave-one-out residuals under which the true value reaches break-even — a probability about the value, never about whether a token launches at all. <strong>EV per $ of gas</strong> is slice / fees. The farm column names the action per row (Vault, Lend, Trade, Mint, Stake, Bridge, Insure, Subscribe or Deposit, from the category), the chain, the fee and the 45-minute setup (fund the wallet, make the deposit). The farm plan lists the seven concrete steps, each with its own cost and time, and the scenario table shows the net if the token drops 5%, 10% or 20% at $1.0K, $10.0K and $100K of capital.</p>
       <h3>What is not done</h3>
-      <p>No protocol name is special-cased anywhere: one function scores every row from TVL, 7-day change, age, category and chains. Traded tokens are never given a model value and pre-token protocols are never given a market cap. Nothing on this page is fetched at view time — the snapshot, the fitted model and the board are bundled with the page, and the page works with no network.</p>
+      <p>No protocol name is special-cased anywhere: one function scores every row from TVL, 7-day change, age, category and chains. Traded tokens are never given a model value and pre-token protocols are never given a market cap. Nothing on this page is fetched at view time — the snapshot, the fitted model and the board are bundled with the page, and the page works with no network. Two variants were tested on the same blind splits and not shipped, and the numbers are stated here rather than hidden. <strong>No sibling factor:</strong> the snapshot carries no parent-protocol record, and no two traded tokens share a name stem or slug prefix, so no sibling discount is fittable and the factor stays 1.0. <strong>No joint ridge:</strong> a ridge on log(market cap / TVL) with category, size, chain, growth and age effects beats this curve on both blind tests (LOO &times;3.22 / 50.0% within 3&times;, time split &times;2.89 / 52.9%), but on the board it reorders heavily, inflates small-TVL rows and pushes the top value above every top entry&rsquo;s range — so the least-squares curve stays the pricing model.</p>
       <p class="fine">Fitted numbers on this page: <span id="method-nums">—</span></p>
     </section>
     <noscript><p class="empty">This dashboard needs JavaScript to render the board from the bundled snapshot.</p></noscript>

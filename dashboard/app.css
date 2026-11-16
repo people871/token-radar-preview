@@ -21,6 +21,8 @@ h1{font-size:26px;line-height:1.25;margin:0 0 10px;max-width:34em}
 h2{font-size:17px;margin:0 0 10px}
 h3{font-size:14px;margin:18px 0 6px;color:var(--amber)}
 .howto{color:var(--muted);margin:0;max-width:62em}
+.hero-line{font-size:15px;margin:10px 0 0;max-width:62em}
+.hero-line b{color:var(--amber)}
 .meta{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:8px 20px;margin:0;flex:0 0 300px}
 .meta div{border-left:2px solid var(--amber-dim);padding-left:10px}
 .meta dt{color:var(--faint);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
@@ -31,6 +33,7 @@ h3{font-size:14px;margin:18px 0 6px;color:var(--amber)}
 .chip{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:6px 12px;font-size:13px}
 .chip b{color:var(--amber)}
 .chip.farm b{color:var(--green)} .chip.thin b{color:var(--amber)} .chip.skip b{color:var(--red)}
+.chip.robust b{color:#34d399}
 .panels{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
 .panels .bestnet{grid-column:1/-1}
 .formula{margin:0 0 10px}
@@ -45,6 +48,11 @@ table{border-collapse:collapse;width:100%}
 .backtest td.num,.backtest th.num{text-align:right;font-family:var(--mono);font-size:13px}
 .backtest tr.win td:first-child{color:var(--green)}
 #scatter svg{display:block;width:100%;height:auto}
+#hist svg{display:block;width:100%;height:auto;margin-top:4px}
+#hist .axis{stroke:var(--line2);stroke-width:1}
+#hist .tick{fill:var(--faint);font:10px var(--mono)}
+#hist .hbar{fill:var(--amber);opacity:.85}
+#farmnext-h{margin-top:18px}
 #scatter .axis{stroke:var(--line2);stroke-width:1}
 #scatter .tick{fill:var(--faint);font:10px var(--mono)}
 #scatter .grid{stroke:var(--line);stroke-width:1}
@@ -86,6 +94,7 @@ td .nm{font-weight:700}
 .badge.early{background:#12233a;color:var(--blue);border:1px solid #1f3a5c}
 .pill{display:inline-block;font:700 11px var(--mono);letter-spacing:.05em;border-radius:999px;padding:3px 9px}
 .pill.FARM{background:var(--green-bg);color:var(--green);border:1px solid #1f5c3a}
+.pill.ROBUST{background:#0f2a22;color:#34d399;border:1px solid #1f5c46}
 .pill.THIN{background:var(--thin-bg);color:var(--amber);border:1px solid var(--amber-dim)}
 .pill.SKIP{background:var(--red-bg);color:var(--red);border:1px solid #5c1f1f}
 .netneg{color:var(--red)} .netpos{color:var(--green)}
